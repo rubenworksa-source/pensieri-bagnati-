@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pensieri Bagnati</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      width: 100vw;
+      background-color: #000;
+      color: #fff;
+      font-family: 'Playfair Display', serif;
+      overflow: hidden;
+      position: relative;
+      cursor: pointer; /* Indica che la pagina è interattiva */
+    }
+
+    h1 {
+      position: absolute;
+      top: 40px;
+      width: 100%;
+      text-align: center;
+      font-weight: 700;
+      font-size: 3rem;
+      margin: 0;
+      text-shadow:
+        1px 1px 2px rgba(0,0,0,0.5),
+        2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    #frase {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-weight: 400;
+      font-size: 1.8rem;
+      text-align: center;
+      max-width: 80%;
+      opacity: 0;
+      transition: opacity 2s ease-in;
+      white-space: pre-line;
+      text-shadow:
+        2px 2px 2px rgba(0,0,0,0.3),
+        1px 1px 1px rgba(255,255,255,0.2);
+    }
+
+    .luce {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: #fff;
+      border-radius: 50%;
+      opacity: 0.8;
+      animation: scintilla 3s infinite alternate;
+    }
+
+    @keyframes scintilla {
+      0% {opacity:0.2; transform: translateY(0);}
+      50% {opacity:1; transform: translateY(-5px);}
+      100% {opacity:0.2; transform: translateY(0);}
+    }
+  </style>
+</head>
+<body>
+  <h1>Pensieri Bagnati</h1>
+  <div id="frase">Caricamento...</div>
+
+  <audio id="audio">
+    <source src="musica.mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    // ======================
+    // Frasi
+    // ======================
+    const frasi = [
+      "Non ti voglio dolce. Ti voglio addosso.",
+      "Sotto la lingua\nci sono parole che non ho detto.\nSotto la pelle\ncarezze che non ti ho fatto.\nE poi ci sei tu—\nche mi guardi come se sapessi\nche ti sto scrivendo col respiro.",
+      "Spogliami i pensieri.\nMa senza fretta.\nCon la lingua.\nCon le mani ferme.\nCon la voglia che sa aspettare.\nFino a scorticarmi l’anima.",
+      "Stasera non voglio dormire.\nVoglio restare sveglia\ntra le tue mani che non ci sono.\nTra i pensieri che mi spogliano piano.\nTra i sogni che mi fanno tremare il cuore.",
+      "Ti lecco i pensieri.\nLi voglio caldi.\nAppiccicosi.\nOsceni.\nCome le dita dopo che mi hai letto con la lingua.",
+      "O mi togli i vestiti.\nO mi togli i pensieri.\nMa scegli in fretta.\nChe mi scotto.",
+      "I pensieri sporchi non vanno lavati.\nVanno leccati via, lentamente.\nCon la lingua del dubbio.\nE un asciugamano troppo piccolo per coprirli.",
+      "Ti penso piano.\nPer non toccarmi troppo.",
+      "Non sono dolce.\nSono quella che ti scopa i pensieri.\nChe ti fa salire il respiro,\ne indurire il cuore.",
+      "Scivolami addosso.\nCome un pensiero che non si toglie.\nLeccami l’anima.\nSporcami la pelle.\nE fammi dormire…\ncon l’odore tuo ancora dentro.",
+      "Ho fame.\nMa non di cibo.\nDi messaggi sporchi.\nDi mani che non sanno stare ferme.\nDi sguardi che fanno più rumore dei baci.\nHo fame di te, anche se non ti conosco.\nO forse proprio per questo.",
+      "Hai addosso l’odore di una notte vissuta.\nDi lenzuola spostate, di pelle appiccicata al desiderio.\nNon servono parole. Solo un altro respiro."
+    ];
+
+    const fraseDiv = document.getElementById('frase');
+    const indice = Math.floor(Math.random() * frasi.length);
+    fraseDiv.textContent = frasi[indice];
+
+    setTimeout(() => {
+      fraseDiv.style.opacity = 1;
+    }, 100);
+
+    // ======================
+    // Punti luce
+    // ======================
+    for (let i = 0; i < 20; i++) {
+      const luce = document.createElement('div');
+      luce.className = 'luce';
+      luce.style.top = Math.random() * 100 + 'vh';
+      luce.style.left = Math.random() * 100 + 'vw';
+      luce.style.animationDuration = (2 + Math.random() * 2) + 's';
+      document.body.appendChild(luce);
+    }
+
+    // ======================
+    // Audio con fade-in su tap
+    // ======================
+    const audio = document.getElementById('audio');
+    const start = 12;
+    const end = 53;
+    const targetVolume = 0.3;
+    const fadeDuration = 1300; // 1.3 secondi
+    const fadeStep = 50;
+    const fadeIncrement = targetVolume / (fadeDuration / fadeStep);
+    let audioStarted = false;
+
+    function fadeInAudio() {
+      audio.volume = 0;
+      const fadeInterval = setInterval(() => {
+        if (audio.volume < targetVolume) {
+          audio.volume = Math.min(audio.volume + fadeIncrement, targetVolume);
+        } else {
+          clearInterval(fadeInterval);
+        }
+      }, fadeStep);
+    }
+
+    function startAudio() {
+      if (audioStarted) return;
+      audioStarted = true;
+      audio.currentTime = start;
+      audio.volume = 0;
+      audio.play().then(() => {
+        fadeInAudio();
+      }).catch(() => {
+        console.log("Autoplay bloccato dal browser");
+      });
+    }
+
+    // Loop automatico
+    audio.addEventListener('timeupdate', () => {
+      if(audio.currentTime >= end){
+        audio.currentTime = start;
+        audio.volume = 0;
+        audio.play();
+        fadeInAudio();
+      }
+    });
+
+    // Ascolta il primo tap/click
+    window.addEventListener('click', startAudio);
+    window.addEventListener('touchstart', startAudio);
+  </script>
+</body>
+</html>
